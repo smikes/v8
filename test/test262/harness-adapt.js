@@ -80,3 +80,13 @@ var ES5Harness = (function() {
     registerTest: registerTest
   }
 })();
+
+var $DONE;
+$DONE = function __v8_$DONE__(arg){
+    if (arg) {
+	print('FAILED! Error: ' + arguments[0]);
+        quit(1);
+    }
+
+    quit(0);
+}
