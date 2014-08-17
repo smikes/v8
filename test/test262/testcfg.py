@@ -57,7 +57,7 @@ class Test262TestSuite(testsuite.TestSuite):
 
   def __init__(self, name, root):
     super(Test262TestSuite, self).__init__(name, root)
-    # set up paths 
+    # set up paths
     self.testroot = os.path.join(self.root, *TEST_262_SUITE_ROOT)
     self.harnesspath = os.path.join(self.root, *TEST_262_HARNESS_ROOT)
 
@@ -155,4 +155,3 @@ class Test262TestSuite(testsuite.TestSuite):
 
 def GetSuite(name, root):
   return Test262TestSuite(name, root)
-

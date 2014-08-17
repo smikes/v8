@@ -89,4 +89,4 @@ $DONE = function __v8_$DONE__(arg){
     }
 
     quit(0);
-}
+};
