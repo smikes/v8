@@ -45,27 +45,25 @@ TEST_262_ROOT = ["data", "test"]
 TEST_262_SUITE_ROOT = TEST_262_ROOT + ["suite"]
 TEST_262_HARNESS_ROOT = TEST_262_ROOT + ["harness"]
 TEST_262_PYTHON_ROOT = ["data", "tools", "packaging"]
+TEST_262_PYTHON_PATH = os.path.join('test', 'test262', *TEST_262_PYTHON_ROOT)
 
-# import parseTestRecord
-sys.path.append(os.path.abspath(os.path.join('test', 'test262', *TEST_262_PYTHON_ROOT)))
+original_sys_path = sys.path
+sys.path.append(os.path.abspath(TEST_262_PYTHON_PATH))
 try:
-  from parseTestRecord import parseTestRecord
+  from parseTestRecord import parseTestRecord as ParseTestRecord
 except ImportError:
   print "Need to --download-data for test262"
+sys.path = original_sys_path
 
 class Test262TestSuite(testsuite.TestSuite):
 
   def __init__(self, name, root):
     super(Test262TestSuite, self).__init__(name, root)
-    # set up paths
     self.testroot = os.path.join(self.root, *TEST_262_SUITE_ROOT)
     self.harnesspath = os.path.join(self.root, *TEST_262_HARNESS_ROOT)
-
-    # basic test harness consists of TEST_262_HARNESS files
-    # and our harness adapter
     self.harness = [os.path.join(self.harnesspath, f)
-                    for f in TEST_262_HARNESS] + [
-                    os.path.join(self.root, "harness-adapt.js")]
+                    for f in TEST_262_HARNESS]
+    self.harness += [os.path.join(self.root, "harness-adapt.js")]
 
   def CommonTestName(self, testcase):
     return testcase.path.split(os.path.sep)[-1]
@@ -92,29 +90,31 @@ class Test262TestSuite(testsuite.TestSuite):
             self.GetIncludesForTest(testcase) +
             [os.path.join(self.testroot, testcase.path + ".js")])
 
+  def GetTestRecord(self, testcase):
+    if hasattr(testcase, "test_record"):
+      return testcase.test_record
+    testcase.test_record = ParseTestRecord(self.GetSourceForTest(testcase),
+                                           testcase.path)
+    return testcase.test_record
+
   def GetIncludesForTest(self, testcase):
-    try:
-      testRecord = parseTestRecord(self.GetSourceForTest(testcase), testcase.path)
+    test_record = self.GetTestRecord(testcase)
+    if "includes" in test_record:
       return [os.path.join(self.harnesspath, f)
-              for f in testRecord['includes']]
-    except KeyError:
-      return []
+              for f in test_record['includes']]
+    return []
 
   def GetSourceForTest(self, testcase):
-    try:
-      return testcase.source
-    except AttributeError:
-      filename = os.path.join(self.testroot, testcase.path + ".js")
-      with open(filename) as f:
-        testcase.source = f.read()
-      return testcase.source
+    filename = os.path.join(self.testroot, testcase.path + ".js")
+    with open(filename) as f:
+      testcase.source = f.read()
+    return testcase.source
 
   def IsNegativeTest(self, testcase):
-    testRecord = parseTestRecord(self.GetSourceForTest(testcase), testcase.path)
-    try:
-      return testRecord['negative']
-    except KeyError:
-      return False
+    test_record = self.GetTestRecord(testcase)
+    if "negative" in test_record:
+      return test_record['negative']
+    return False
 
   def IsFailureOutput(self, output, testpath):
     if output.exit_code != 0:

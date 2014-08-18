@@ -81,10 +81,9 @@ var ES5Harness = (function() {
   }
 })();
 
-var $DONE;
-$DONE = function __v8_$DONE__(arg){
+function $DONE(arg){
     if (arg) {
-        print('FAILED! Error: ' + arguments[0]);
+        print('FAILED! Error: ' + arg);
         quit(1);
     }
 
