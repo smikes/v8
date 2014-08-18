@@ -38,6 +38,52 @@
   '11.2.3_b': [FAIL],
   '12.2.3_b': [FAIL],
 
+  ###################### NEEDS INVESTIGATION (2014) #######################
+
+  # Cause unknown.
+  'bug_596_1': [FAIL],
+
+  # New ES6 Array functions.
+  'S22.1.3.6_T1': [FAIL],
+  'S22.1.2.3_T1': [FAIL],
+  'S22.1.2.1_T1': [FAIL],
+  'S22.1.2.1_T2': [FAIL],
+  'S22.1.2.3_T2': [FAIL],
+
+  # New ES6 function String.prototype.contains, unimplemented in v8.
+  'String.prototype.contains_lengthProp': [FAIL],
+  'String.prototype.contains_FailBadLocation': [FAIL],
+  'String.prototype.contains_SuccessNoLocation': [FAIL],
+  'String.prototype.contains_Success': [FAIL],
+  'String.prototype.contains_FailLocation': [FAIL],
+  'String.prototype.contains_FailMissingLetter': [FAIL],
+
+  # New ES6 function String.prototype.endsWith, unimplemented in v8.
+  'String.prototype.endsWith_Success_3': [FAIL],
+  'String.prototype.endsWith_Success_4': [FAIL],
+  'String.prototype.endsWith_Fail': [FAIL],
+  'String.prototype.endsWith_Success': [FAIL],
+  'String.prototype.endsWith_Fail_2': [FAIL],
+  'String.prototype.endsWith_Success_2': [FAIL],
+
+  # New ES6 function Array.prototype.find, unimplemented in v8.
+  'Array.prototype.find_non-returning-predicate': [FAIL],
+  'Array.prototype.find_this-undefined': [FAIL],
+  'Array.prototype.find_length-property': [FAIL],
+  'Array.prototype.find_return-found-value': [FAIL],
+  'Array.prototype.find_this-defined': [FAIL],
+  'Array.prototype.find_modify-after-start': [FAIL],
+  'Array.prototype.find_this-is-object': [FAIL],
+  'Array.prototype.find_empty-array-undefined': [FAIL],
+  'Array.prototype.find_callable-predicate': [FAIL],
+  'Array.prototype.find_predicate-arguments': [FAIL],
+  'Array.prototype.find_remove-after-start': [FAIL],
+  'Array.prototype.find_skip-empty': [FAIL],
+  'Array.prototype.find_push-after-start': [FAIL],
+
+  # This negative test fails for the wrong reason.
+  #'Array.prototype.find_noncallable-predicate': [FAIL],
+
   ######################## NEEDS INVESTIGATION ###########################
 
   # These test failures are specific to the intl402 suite and need investigation
