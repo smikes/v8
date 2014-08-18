@@ -40,22 +40,20 @@ from testrunner.objects import testcase
 TEST_262_ARCHIVE_REVISION = "595a36b"  # This is the 2014-Aug-10 revision.
 TEST_262_ARCHIVE_MD5 = "89dfc8458f474cdb7e8e178f3215dd06"
 TEST_262_URL = "https://github.com/tc39/test262/tarball/%s"
-TEST_262_HARNESS = ["sta.js"]
+TEST_262_HARNESS_FILES = ["sta.js"]
 
-TEST_262_ROOT = ["data", "test"]
-TEST_262_SUITE_ROOT = TEST_262_ROOT + ["suite"]
-TEST_262_HARNESS_ROOT = TEST_262_ROOT + ["harness"]
-TEST_262_PYTHON_ROOT = ["data", "tools", "packaging"]
-TEST_262_PYTHON_PATH = os.path.join('test', 'test262', *TEST_262_PYTHON_ROOT)
+TEST_262_SUITE_PATH = ["data", "test", "suite"]
+TEST_262_HARNESS_PATH = ["data", "test", "harness"]
+TEST_262_PYTHON_PATH = ["data", "tools", "packaging"]
 
 class Test262TestSuite(testsuite.TestSuite):
 
   def __init__(self, name, root):
     super(Test262TestSuite, self).__init__(name, root)
-    self.testroot = os.path.join(self.root, *TEST_262_SUITE_ROOT)
-    self.harnesspath = os.path.join(self.root, *TEST_262_HARNESS_ROOT)
+    self.testroot = os.path.join(self.root, *TEST_262_SUITE_PATH)
+    self.harnesspath = os.path.join(self.root, *TEST_262_HARNESS_PATH)
     self.harness = [os.path.join(self.harnesspath, f)
-                    for f in TEST_262_HARNESS]
+                    for f in TEST_262_HARNESS_FILES]
     self.harness += [os.path.join(self.root, "harness-adapt.js")]
     self.ParseTestRecord = None
 
@@ -109,9 +107,11 @@ class Test262TestSuite(testsuite.TestSuite):
   def GetIncludesForTest(self, testcase):
     test_record = self.GetTestRecord(testcase)
     if "includes" in test_record:
-      return [os.path.join(self.harnesspath, f)
-              for f in test_record['includes']]
-    return []
+      includes = [os.path.join(self.harnesspath, f)
+              for f in test_record["includes"]]
+    else:
+      includes = []
+    return includes
 
   def GetSourceForTest(self, testcase):
     filename = os.path.join(self.testroot, testcase.path + ".js")
@@ -121,9 +121,7 @@ class Test262TestSuite(testsuite.TestSuite):
 
   def IsNegativeTest(self, testcase):
     test_record = self.GetTestRecord(testcase)
-    if "negative" in test_record:
-      return test_record['negative']
-    return False
+    return "negative" in test_record
 
   def IsFailureOutput(self, output, testpath):
     if output.exit_code != 0:
