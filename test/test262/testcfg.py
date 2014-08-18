@@ -116,8 +116,7 @@ class Test262TestSuite(testsuite.TestSuite):
   def GetSourceForTest(self, testcase):
     filename = os.path.join(self.testroot, testcase.path + ".js")
     with open(filename) as f:
-      testcase.source = f.read()
-    return testcase.source
+      return f.read()
 
   def IsNegativeTest(self, testcase):
     test_record = self.GetTestRecord(testcase)
