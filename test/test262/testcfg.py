@@ -31,6 +31,7 @@ import os
 import shutil
 import sys
 import tarfile
+import imp
 
 from testrunner.local import testsuite
 from testrunner.local import utils
@@ -47,14 +48,6 @@ TEST_262_HARNESS_ROOT = TEST_262_ROOT + ["harness"]
 TEST_262_PYTHON_ROOT = ["data", "tools", "packaging"]
 TEST_262_PYTHON_PATH = os.path.join('test', 'test262', *TEST_262_PYTHON_ROOT)
 
-original_sys_path = sys.path
-sys.path.append(os.path.abspath(TEST_262_PYTHON_PATH))
-try:
-  from parseTestRecord import parseTestRecord as ParseTestRecord
-except ImportError:
-  print "Need to --download-data for test262"
-sys.path = original_sys_path
-
 class Test262TestSuite(testsuite.TestSuite):
 
   def __init__(self, name, root):
@@ -64,6 +57,7 @@ class Test262TestSuite(testsuite.TestSuite):
     self.harness = [os.path.join(self.harnesspath, f)
                     for f in TEST_262_HARNESS]
     self.harness += [os.path.join(self.root, "harness-adapt.js")]
+    self.ParseTestRecord = None
 
   def CommonTestName(self, testcase):
     return testcase.path.split(os.path.sep)[-1]
@@ -90,11 +84,26 @@ class Test262TestSuite(testsuite.TestSuite):
             self.GetIncludesForTest(testcase) +
             [os.path.join(self.testroot, testcase.path + ".js")])
 
+  def LoadParseTestRecord(self):
+    if not self.ParseTestRecord:
+      root = os.path.join(self.root, *TEST_262_PYTHON_PATH)
+      f = None
+      try:
+        (f, pathname, description) = imp.find_module("parseTestRecord", [root])
+        module = imp.load_module("parseTestRecord", f, pathname, description)
+        self.ParseTestRecord = module.parseTestRecord
+      finally:
+        if f:
+          f.close()
+    if not self.ParseTestRecord:
+      raise Error("Cannot load parseTestRecord; you may need to --download-data for test262")
+    return self.ParseTestRecord
+
   def GetTestRecord(self, testcase):
-    if hasattr(testcase, "test_record"):
-      return testcase.test_record
-    testcase.test_record = ParseTestRecord(self.GetSourceForTest(testcase),
-                                           testcase.path)
+    ParseTestRecord = self.LoadParseTestRecord()
+    if not hasattr(testcase, "test_record"):
+      testcase.test_record = ParseTestRecord(self.GetSourceForTest(testcase),
+                                             testcase.path)
     return testcase.test_record
 
   def GetIncludesForTest(self, testcase):
