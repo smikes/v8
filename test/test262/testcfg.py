@@ -44,7 +44,7 @@ TEST_262_HARNESS_FILES = ["sta.js"]
 
 TEST_262_SUITE_PATH = ["data", "test", "suite"]
 TEST_262_HARNESS_PATH = ["data", "test", "harness"]
-TEST_262_PYTHON_PATH = ["data", "tools", "packaging"]
+TEST_262_TOOLS_PATH = ["data", "tools", "packaging"]
 
 class Test262TestSuite(testsuite.TestSuite):
 
@@ -84,22 +84,23 @@ class Test262TestSuite(testsuite.TestSuite):
 
   def LoadParseTestRecord(self):
     if not self.ParseTestRecord:
-      root = os.path.join(self.root, *TEST_262_PYTHON_PATH)
+      root = os.path.join(self.root, *TEST_262_TOOLS_PATH)
       f = None
       try:
         (f, pathname, description) = imp.find_module("parseTestRecord", [root])
         module = imp.load_module("parseTestRecord", f, pathname, description)
         self.ParseTestRecord = module.parseTestRecord
+      except:
+        raise ImportError("Cannot load parseTestRecord; you may need to "
+                          "--download-data for test262")
       finally:
         if f:
           f.close()
-    if not self.ParseTestRecord:
-      raise Error("Cannot load parseTestRecord; you may need to --download-data for test262")
     return self.ParseTestRecord
 
   def GetTestRecord(self, testcase):
-    ParseTestRecord = self.LoadParseTestRecord()
     if not hasattr(testcase, "test_record"):
+      ParseTestRecord = self.LoadParseTestRecord()
       testcase.test_record = ParseTestRecord(self.GetSourceForTest(testcase),
                                              testcase.path)
     return testcase.test_record
@@ -108,7 +109,7 @@ class Test262TestSuite(testsuite.TestSuite):
     test_record = self.GetTestRecord(testcase)
     if "includes" in test_record:
       includes = [os.path.join(self.harnesspath, f)
-              for f in test_record["includes"]]
+                  for f in test_record["includes"]]
     else:
       includes = []
     return includes
